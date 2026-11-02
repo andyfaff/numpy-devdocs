@@ -7,7 +7,9 @@ on:
   pull_request:
     branches:
       - main
-      - maintenance/**
+  schedule:
+    - cron: '17 3 * * *'
+  workflow_dispatch:
 
 
 defaults:
@@ -32,7 +34,7 @@ jobs:
 
     - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
       with:
-        python-version: '3.14'
+        python-version: '3.13'
 
     - name: Install system dependencies
       run: |
@@ -62,8 +64,8 @@ jobs:
 
     - name: doctests
       run: |
-        #spin check-docs -v
-        #spin check-tutorials -v
+        spin check-docs -v
+        spin check-tutorials -v
         # Currently, this does two checks not done by check-docs:
         #  - validates ReST blocks (via validate_rst_syntax)
         #  - checks that all of a module's `__all__` is reflected in the
@@ -82,7 +84,7 @@ jobs:
     # Add a dependency to the build job
     needs: docs
     # Only deploy from main; PR builds just check that the docs build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    if: github.event_name != 'pull_request' && github.ref == 'refs/heads/main'
 
     # Grant GITHUB_TOKEN the permissions required to make a Pages deployment
     permissions:
