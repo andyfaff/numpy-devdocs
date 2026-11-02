@@ -1,0 +1,49 @@
+name: Build docs
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+      - maintenance/**
+
+
+defaults:
+  run:
+    shell: bash
+
+
+permissions:
+  contents: read # to fetch code (actions/checkout)
+
+
+jobs:
+  docs:
+    runs-on: ubuntu-24.04
+    steps:
+    - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      with:
+        submodules: recursive
+        fetch-tags: true
+        persist-credentials: false
+
+    - uses: actions/setup-python@6d4fd22b20465ccc0f7354476588e8df7c9ca0e0 # v7.1.0
+      with:
+        python-version: '3.14'
+
+    - name: Install and build
+      run: |
+        pip install --upgrade pip
+        pip install --group build --group dev-cli --group openblas64
+        spin build --with-scipy-openblas=64 -j 2
+
+    - name: build devdocs w/ref warnings
+      run: |
+        # Don't use -q, show warning summary"
+        SPHINXOPTS="-W -n" spin docs
+        if [[ $(find doc/build/html -type f | wc -l) -lt 1000 ]]; then
+            echo "doc build failed: doc/build/html is empty"
+            exit -1
+        fi
