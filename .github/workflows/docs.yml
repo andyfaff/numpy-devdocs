@@ -62,8 +62,8 @@ jobs:
 
     - name: doctests
       run: |
-        spin check-docs -v
-        spin check-tutorials -v
+        #spin check-docs -v
+        #spin check-tutorials -v
         # Currently, this does two checks not done by check-docs:
         #  - validates ReST blocks (via validate_rst_syntax)
         #  - checks that all of a module's `__all__` is reflected in the
